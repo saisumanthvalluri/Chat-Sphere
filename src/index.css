@@ -1,7 +1,164 @@
+:root {
+    --input-bg-color: rgba(17, 25, 40, 0.6);
+    --input-placeholder-color: #9b8db7;
+
+    --button-bg-color: #5183fe;
+    --button-hover-bg-color: #3f6de2;
+    --button-bg-success-color: rgba(93, 224, 67, 0.747);
+    --button-hover-bg-success-color: rgba(65, 177, 43, 0.747);
+    --button-bg-danger-color: rgba(238, 39, 55, 0.747);
+    --button-hover-bg-danger-color: rgba(207, 30, 45, 0.747);
+    --button-dissabled-bg-danger-color: rgba(172, 50, 60, 0.747);
+
+    --text-primary-color: #d1cbf1;
+    --text-secondary-color: #ffffff;
+    --text-success-color: rgba(85, 218, 59, 0.747);
+    --text-danger-color: rgba(238, 39, 55, 0.747);
+
+    --border-primary-color: #dddddd35;
+
+    --scrollbar-color: rgba(17, 25, 40, 0.6);
+    --scrollbar-hover-color: rgba(17, 25, 40, 0.8);
+
+    --chat-active-bg-color: rgba(17, 25, 50, 0.3);
+    --chat-msg-text-receiver-bg-color: rgba(17, 25, 40, 0.4);
+    --chat-msg-text-sender-bg-color: #5183fe;
+}
+
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana,
+        sans-serif;
+}
+
+body {
+    background-image: url("/app-bg.jpg");
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.03rem;
+}
+
+.bg-container {
+    width: 85vw;
+    height: 85vh;
+    background-color: rgba(17, 25, 40, 0.65);
+    backdrop-filter: blur(10px) saturate(180%);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: rgba(73, 167, 225, 0.577);
+    font-size: 14px;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        text-decoration: underline;
+        color: rgba(73, 167, 225, 1);
+        transition: all 0.3s ease-in-out;
+    }
+}
+
+.loader {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: none;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover-color);
+}
+
+@media (min-width: 1300px) {
+    .bg-container {
+        width: 65vw;
+        height: 70vh;
+    }
+}
+
+@media (max-width: 600px) {
+    .bg-container {
+        width: 90vw;
+        height: 50vh;
+    }
+}
+
+/* confm modal styles */
+.cnfm-mdl-box {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    padding: 15px;
+    gap: 15px;
+
+    .cnfm-title {
+        font-size: 14px;
+        font-weight: 300;
+        color: var(--text-secondary-color);
+        text-align: center;
+        line-height: 20px;
+    }
+
+    .yes-no-btn-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+
+        button {
+            border: none;
+            outline: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            background-color: var(--button-bg-success-color);
+            color: var(--text-secondary-color);
+            font-size: 12px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                background-color: var(--button-hover-bg-success-color);
+            }
+        }
+
+        .yes {
+            background-color: var(--button-bg-danger-color);
+            color: var(--text-secondary-color);
+            font-size: 12px;
+            font-weight: 400;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--button-hover-bg-danger-color);
+            }
+        }
+    }
 }

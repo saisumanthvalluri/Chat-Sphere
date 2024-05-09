@@ -1,0 +1,42 @@
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    img {
+        width: 45px;
+        animation: rotate 10s linear infinite;
+    }
+
+    span {
+        font-size: 25px;
+        font-weight: 600;
+        background: linear-gradient(45deg, #f542dd, #f7e736, #2be31e, #1191f2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (min-width: 1300px) {
+    .logo {
+        gap: 15px;
+
+        img {
+            width: 55px;
+        }
+
+        span {
+            font-size: 30px;
+        }
+    }
+}
