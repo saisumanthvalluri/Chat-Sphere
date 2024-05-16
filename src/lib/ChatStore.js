@@ -6,6 +6,7 @@ export const useChatStore = create((set) => ({
     user: null,
     isCurrentUserBlocked: false,
     isReceiverBlocked: false,
+    isNotificationsOpen: false,
 
     changeChat: (chatId, user) => {
         const currentUser = UserUserStore.getState().currentUser;
@@ -50,5 +51,16 @@ export const useChatStore = create((set) => ({
 
     toggleBlock: () => {
         set((state) => ({ ...state, isReceiverBlocked: !state.isReceiverBlocked }));
+    },
+
+    // notification box methods
+    toggleNotifications: () => {
+        set((state) => ({ ...state, isNotificationsOpen: !state.isNotificationsOpen }));
+    },
+    setNotificationsClose: () => {
+        set((state) => ({ ...state, isNotificationsOpen: false }));
+    },
+    setNotificationsOpen: () => {
+        set((state) => ({ ...state, isNotificationsOpen: true }));
     },
 }));

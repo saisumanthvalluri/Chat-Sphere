@@ -3,25 +3,17 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import { UserUserStore } from "../../../lib/UserStore";
 import "./UserInfo.css";
 import { useEffect, useState } from "react";
-import {
-    arrayRemove,
-    arrayUnion,
-    collection,
-    doc,
-    getDoc,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
-} from "firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../Config/Firebase-Config";
 import DynamicDateFormatter from "../../DynamicDateFormatter/DynamicDateFormatter";
 import { toast } from "react-toastify";
+import { useChatStore } from "../../../lib/ChatStore";
 
 const UserInfo = () => {
-    const [openNotifications, setOpenNotifications] = useState(false);
+    // const [openNotifications, setOpenNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const { currentUser } = UserUserStore();
-    // console.log(currentUser, "haiuhsu");
+    const { isNotificationsOpen, setNotificationsClose, toggleNotifications } = useChatStore();
 
     useEffect(() => {
         const getNotifications = async () => {
@@ -58,16 +50,20 @@ const UserInfo = () => {
                 updatedAt: Date.now(),
                 isSeen: true,
             };
-            const filteredNotifications = notifications.filter((item) => item.senderId !== notification.senderId);
             await Promise.all([
                 updateDoc(doc(userChatsRef, notification?.user?.uid), { chats: arrayUnion(chatData) }),
                 updateDoc(doc(userChatsRef, currentUser.uid), {
                     chats: arrayUnion({ ...chatData, receiverId: notification?.user?.uid }),
                 }),
                 updateDoc(doc(usersRef, currentUser.uid), {
-                    notifications: filteredNotifications,
+                    notifications: notifications.filter(
+                        (item) => item.senderId !== notification.senderId && item.type !== 1
+                    ),
                 }),
             ]);
+            setNotifications(
+                notifications.filter((item) => item.senderId !== notification.senderId && item.type !== 1)
+            );
         } catch (error) {
             console.log(error);
             toast.error(error.message);
@@ -84,7 +80,7 @@ const UserInfo = () => {
                 {/* <img src="/more.png" alt="more" /> */}
                 {/* <img src="/video.png" alt="video" /> */}
                 <img src="edit.png" alt="edit" />
-                <div className="bell-icon-box" onClick={() => setOpenNotifications((prev) => !prev)}>
+                <div className="bell-icon-box" onClick={toggleNotifications}>
                     <BsBell className="icon" />
                     {currentUser?.notifications?.length > 0 && (
                         <div className="count">
@@ -95,7 +91,7 @@ const UserInfo = () => {
                     )}
                 </div>
                 {/* notifications box starts */}
-                {openNotifications && (
+                {isNotificationsOpen && (
                     <div className="notifications-modal">
                         <div className="title-box">
                             <h3>Notifications</h3>
@@ -108,36 +104,45 @@ const UserInfo = () => {
                             </label>
                             <IoIosCloseCircleOutline
                                 className="close-icon"
-                                onClick={() => setOpenNotifications(false)}
+                                onClick={setNotificationsClose}
                                 title="close"
                             />
                         </div>
-                        <div className="latest-mark-box">
-                            <span className="latest">LATEST</span>
-                            <span className="mark-as-read-text">Mark all as read</span>
-                        </div>
-                        <ul>
-                            {notifications.map((notification, index) => (
-                                <li key={index}>
-                                    <img src={notification?.user?.avatarUrl || "./avatar.png"} alt="avatar" />
-                                    <div className="notification-detail">
-                                        <h5>
-                                            {`${notification.user.name} sent you friend request.`}{" "}
-                                            <span>{DynamicDateFormatter(notification.createdAt, true)}</span>
-                                        </h5>
-                                        <div className="actions">
-                                            <button className="decline">Decline</button>
-                                            <button className="accept" onClick={() => handleAccept(notification)}>
-                                                Accept
-                                            </button>
+                        {notifications.length > 0 && (
+                            <div className="latest-mark-box">
+                                <span className="latest">LATEST</span>
+                                <span className="mark-as-read-text">Mark all as read</span>
+                            </div>
+                        )}
+                        {notifications.length > 0 ? (
+                            <ul>
+                                {notifications.map((notification, index) => (
+                                    <li key={index}>
+                                        <img src={notification?.user?.avatarUrl || "./avatar.png"} alt="avatar" />
+                                        <div className="notification-detail">
+                                            <h5>
+                                                {`${notification.user.name} sent you friend request.`}{" "}
+                                                <span>{DynamicDateFormatter(notification.createdAt, true)}</span>
+                                            </h5>
+                                            <div className="actions">
+                                                <button className="decline">Decline</button>
+                                                <button className="accept" onClick={() => handleAccept(notification)}>
+                                                    Accept
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="read-unread-box">
-                                        <input type="checkbox" />
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                                        <div className="read-unread-box">
+                                            <input type="checkbox" />
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="empty-notif-box">
+                                <img src="/no-notifications.png" alt="" />
+                                <p>You don&apos;t have any notifications</p>
+                            </div>
+                        )}
                     </div>
                 )}
                 {/* notifications box ends */}

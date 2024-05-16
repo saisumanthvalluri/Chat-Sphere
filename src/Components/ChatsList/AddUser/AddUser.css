@@ -21,6 +21,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        justify-content: space-between;
         gap: 10px;
 
         input {
@@ -33,6 +34,7 @@
             background-color: var(--input-bg-color);
             outline: none;
             font-size: 12px;
+            flex: 1;
 
             &::placeholder {
                 color: var(--input-placeholder-color);
@@ -90,9 +92,20 @@
             cursor: pointer;
         }
     }
+
+    .req-helper-text {
+        font-size: 10px;
+        font-weight: 400;
+        color: var(--text-secondary-color);
+        width: 250px;
+        line-height: 15px;
+
+        span {
+            color: var(--text-danger-color);
+            font-size: 12px;
+        }
+    }
 }
-
-
 
 @keyframes slide {
     0% {
