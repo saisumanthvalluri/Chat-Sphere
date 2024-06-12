@@ -84,8 +84,8 @@
             min-width: 400px;
             min-height: 400px;
             padding: 10px;
-            background-color: var(--input-bg-color);
-            /* backdrop-filter: blur(2px); */
+            background-color: var(--input-bg-color-2);
+            backdrop-filter: blur(-50px);
             z-index: 999;
             border-radius: 0 10px 10px 10px;
 
@@ -234,7 +234,7 @@
                         flex: 1;
 
                         h5 {
-                            font-size: 12px;
+                            font-size: 10px;
                             font-weight: 400;
                             color: var(--text-secondary-color);
                             flex-grow: 1;
@@ -252,8 +252,8 @@
                             gap: 10px;
 
                             button {
-                                font-size: 10px;
-                                font-weight: 400;
+                                font-size: 9px;
+                                font-weight: 500;
                                 color: var(--text-primary-color);
                                 background-color: var(--button-bg-color);
                                 border: none;
@@ -322,7 +322,7 @@
             width: 0;
             height: 0;
             border-left: 10px solid transparent;
-            border-bottom: 10px solid var(--input-bg-color); /* Change color as needed */
+            border-bottom: 10px solid var(--input-bg-color-2); /* Change color as needed */
             transform: rotate(-90deg);
             position: absolute;
             left: -9.5px;

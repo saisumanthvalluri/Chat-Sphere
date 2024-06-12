@@ -6,7 +6,7 @@ import { UserUserStore } from "../../lib/UserStore";
 import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "../../Config/Firebase-Config";
 import { useChatStore } from "../../lib/ChatStore";
-import PulseRing from "../PulseRing.jsx/PulseRing";
+import PulseRing from "../PulseRing/PulseRing";
 import DynamicDateFormatter from "../DynamicDateFormatter/DynamicDateFormatter";
 
 const ChatsList = () => {
@@ -151,7 +151,77 @@ const ChatsList = () => {
                         {!chat.isSeen && <span>{<PulseRing />}</span>}
                     </li>
                 ))}
+                {/* <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li>
+                <li className={`chat-item`}>
+                    <img src={"/avatar.png"} alt="avatar" />
+                    <div className="chat-detail">
+                        <div className="name-time">
+                            <p className="name">Hello</p>
+                            <p className="time">12:00</p>
+                        </div>
+                    </div>
+                </li> */}
             </ul>
+            {getFilteredChats().length === 0 && (
+                <div className="no-chats-box">
+                    <img src={"/no-chats.png"} alt="no-chats" />
+                    <p>No chats found</p>
+                    <button onClick={handleAddChat}>Add new chat</button>
+                </div>
+            )}
             {addOpen && <AddUser setAddOpen={setAddOpen} />}
         </div>
     );

@@ -30,7 +30,7 @@ const Detail = () => {
     };
 
     const getTextForBlockBtn = () => {
-        if (isCurrentUserBlocked) return "You are blocked!";
+        if (isCurrentUserBlocked) return "You are blocked !";
         return isReceiverBlocked ? "Unblock" : "Block user";
     };
 
@@ -111,7 +111,7 @@ const Detail = () => {
                     </button>
                     {/* <button className="delete-btn">Delete User</button> */}
                     <button className="logout" onClick={() => setOpenMdl(true)}>
-                        logout
+                        Logout
                     </button>
                 </div>
             </div>

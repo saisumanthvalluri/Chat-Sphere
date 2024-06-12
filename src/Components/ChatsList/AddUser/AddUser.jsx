@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import "./AddUser.css";
 import { db } from "../../../Config/Firebase-Config";
 import { toast } from "react-toastify";
 import { UserUserStore } from "../../../lib/UserStore";
 import DynamicLoader from "../../DymanicLoader/Loader";
 import { useChatStore } from "../../../lib/ChatStore";
+import generateRandomId from "../../Common/DynamicIdGenerator";
 
 const AddUser = ({ setAddOpen }) => {
     const [searchedUser, setSearchedUser] = useState(null);
@@ -68,12 +69,12 @@ const AddUser = ({ setAddOpen }) => {
     };
 
     const checkRequestSent = async (user) => {
-        const requestExists = user?.notifications?.find((e) => e?.senderId === currentUser?.uid);
+        const requestExists = user?.notifications?.find((e) => e?.senderId === currentUser?.uid && e?.type === 1);
         return requestExists;
     };
 
     const checkCurrUserHasReq = (user) => {
-        const requestExists = currentUser?.notifications?.find((e) => e?.senderId === user?.uid);
+        const requestExists = currentUser?.notifications?.find((e) => e?.senderId === user?.uid && e?.type === 1);
         return requestExists;
     };
 
@@ -135,6 +136,7 @@ const AddUser = ({ setAddOpen }) => {
                 const searchedUserRef = collection(db, "users");
                 await updateDoc(doc(searchedUserRef, searchedUser.uid), {
                     notifications: arrayUnion({
+                        id: generateRandomId(),
                         senderId: currentUser.uid,
                         type: 1, // type 1 indicates that sent friend request
                         createdAt: Date.now(),

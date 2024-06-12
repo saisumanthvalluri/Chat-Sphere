@@ -1,5 +1,6 @@
 :root {
     --input-bg-color: rgba(17, 25, 40, 0.6);
+    --input-bg-color-2: rgba(17, 25, 40, 0.7);
     --input-placeholder-color: #9b8db7;
 
     --button-bg-color: #5183fe;
@@ -82,6 +83,7 @@ a {
 /* Track */
 ::-webkit-scrollbar-track {
     background: none;
+    scrollbar-gutter: stable;
 }
 
 /* Handle */

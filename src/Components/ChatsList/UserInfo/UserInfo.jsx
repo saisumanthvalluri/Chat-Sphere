@@ -8,17 +8,17 @@ import { db } from "../../../Config/Firebase-Config";
 import DynamicDateFormatter from "../../DynamicDateFormatter/DynamicDateFormatter";
 import { toast } from "react-toastify";
 import { useChatStore } from "../../../lib/ChatStore";
+import generateRandomId from "../../Common/DynamicIdGenerator";
 
 const UserInfo = () => {
     // const [openNotifications, setOpenNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [onlyUnread, setOnlyUnread] = useState(false);
     const { currentUser } = UserUserStore();
     const { isNotificationsOpen, setNotificationsClose, toggleNotifications } = useChatStore();
 
     useEffect(() => {
         const getNotifications = async () => {
-            if (currentUser?.notifications?.length === 0) return;
-
             const promissess = currentUser?.notifications.map(async (notification) => {
                 const userRef = doc(db, "users", notification.senderId);
                 const userSnap = await getDoc(userRef);
@@ -30,10 +30,15 @@ const UserInfo = () => {
             const allNotifications = await Promise.all(promissess);
             setNotifications(allNotifications.sort((a, b) => b.createdAt - a.createdAt));
         };
-        getNotifications();
+        currentUser?.notifications?.length > 0 && getNotifications();
     }, [currentUser?.notifications]);
 
     const handleAccept = async (notification) => {
+        const formatedNotifications = notifications.map((item) => {
+            const { user, ...rest } = item;
+
+            return rest;
+        });
         try {
             const chatRef = collection(db, "chats");
             const userChatsRef = collection(db, "userChats");
@@ -56,17 +61,55 @@ const UserInfo = () => {
                     chats: arrayUnion({ ...chatData, receiverId: notification?.user?.uid }),
                 }),
                 updateDoc(doc(usersRef, currentUser.uid), {
-                    notifications: notifications.filter(
-                        (item) => item.senderId !== notification.senderId && item.type !== 1
-                    ),
+                    notifications: formatedNotifications.filter((item) => item.id !== notification.id),
                 }),
             ]);
-            setNotifications(
-                notifications.filter((item) => item.senderId !== notification.senderId && item.type !== 1)
-            );
+            setNotifications(notifications.filter((item) => item.id !== notification.id));
         } catch (error) {
             console.log(error);
             toast.error(error.message);
+        }
+    };
+
+    const handleDecline = async (notification) => {
+        const formatedNotifications = notifications.map((item) => {
+            const { user, ...rest } = item;
+
+            return rest;
+        });
+        const frdReqDeclineNotif = {
+            id: generateRandomId(),
+            senderId: currentUser.uid,
+            type: 2, // type 2 indicates that declined friend request
+            createdAt: Date.now(),
+            isSeen: false,
+            // msg: `${currentUser.name} sent you as a friend`,
+        };
+
+        const allNotif = [...formatedNotifications, frdReqDeclineNotif];
+        try {
+            const usersRef = collection(db, "users");
+
+            await Promise.all([
+                updateDoc(doc(usersRef, currentUser.uid), {
+                    notifications: formatedNotifications.filter((item) => item.id !== notification.id),
+                }),
+                updateDoc(doc(usersRef, notification.senderId), {
+                    notifications: allNotif.filter((item) => item.id !== notification.id),
+                }),
+            ]);
+            setNotifications(formatedNotifications.filter((item) => item.id !== notification.id));
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+        }
+    };
+
+    const filterNotifications = () => {
+        if (onlyUnread) {
+            return notifications.filter((item) => item.isSeen === false);
+        } else {
+            return notifications;
         }
     };
 
@@ -99,7 +142,12 @@ const UserInfo = () => {
                                 Show only unread
                             </label>
                             <label className="switch">
-                                <input id="UNREAD" type="checkbox" />
+                                <input
+                                    id="UNREAD"
+                                    type="checkbox"
+                                    value={onlyUnread}
+                                    onChange={(e) => setOnlyUnread(e.target.checked)}
+                                />
                                 <span className="slider round"></span>
                             </label>
                             <IoIosCloseCircleOutline
@@ -114,28 +162,64 @@ const UserInfo = () => {
                                 <span className="mark-as-read-text">Mark all as read</span>
                             </div>
                         )}
-                        {notifications.length > 0 ? (
+                        {filterNotifications().length > 0 ? (
                             <ul>
-                                {notifications.map((notification, index) => (
-                                    <li key={index}>
-                                        <img src={notification?.user?.avatarUrl || "./avatar.png"} alt="avatar" />
-                                        <div className="notification-detail">
-                                            <h5>
-                                                {`${notification.user.name} sent you friend request.`}{" "}
-                                                <span>{DynamicDateFormatter(notification.createdAt, true)}</span>
-                                            </h5>
-                                            <div className="actions">
-                                                <button className="decline">Decline</button>
-                                                <button className="accept" onClick={() => handleAccept(notification)}>
-                                                    Accept
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="read-unread-box">
-                                            <input type="checkbox" />
-                                        </div>
-                                    </li>
-                                ))}
+                                {filterNotifications().map((notification, index) => {
+                                    switch (notification.type) {
+                                        case 1:
+                                            return (
+                                                <li key={index}>
+                                                    <img
+                                                        src={notification?.user?.avatarUrl || "./avatar.png"}
+                                                        alt="avatar"
+                                                    />
+                                                    <div className="notification-detail">
+                                                        <h5>
+                                                            {`${notification.user.name} sent you friend request.`}{" "}
+                                                            <span>
+                                                                {DynamicDateFormatter(notification.createdAt, true)}
+                                                            </span>
+                                                        </h5>
+                                                        <div className="actions">
+                                                            <button
+                                                                className="decline"
+                                                                onClick={() => handleDecline(notification)}>
+                                                                Decline
+                                                            </button>
+                                                            <button
+                                                                className="accept"
+                                                                onClick={() => handleAccept(notification)}>
+                                                                Accept
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="read-unread-box">
+                                                        <input type="checkbox" />
+                                                    </div>
+                                                </li>
+                                            );
+                                        case 2:
+                                            return (
+                                                <li key={index}>
+                                                    <img
+                                                        src={notification?.user?.avatarUrl || "./avatar.png"}
+                                                        alt="avatar"
+                                                    />
+                                                    <div className="notification-detail">
+                                                        <h5>
+                                                            {`${notification.user.name} declined your friend request.`}{" "}
+                                                            <span>
+                                                                {DynamicDateFormatter(notification.createdAt, true)}
+                                                            </span>
+                                                        </h5>
+                                                    </div>
+                                                </li>
+                                            );
+
+                                        default:
+                                            break;
+                                    }
+                                })}
                             </ul>
                         ) : (
                             <div className="empty-notif-box">
