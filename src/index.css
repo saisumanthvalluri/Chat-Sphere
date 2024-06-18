@@ -1,6 +1,6 @@
 :root {
     --input-bg-color: rgba(17, 25, 40, 0.6);
-    --input-bg-color-2: rgba(17, 25, 40, 0.7);
+    --input-bg-color-2: rgba(17, 25, 40, 0.8);
     --input-placeholder-color: #9b8db7;
 
     --button-bg-color: #5183fe;
@@ -100,7 +100,7 @@ a {
 
 @media (min-width: 1300px) {
     .bg-container {
-        width: 65vw;
+        width: 68vw;
         height: 70vh;
     }
 }

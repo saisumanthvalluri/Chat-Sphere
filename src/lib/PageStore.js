@@ -19,7 +19,6 @@ export const UsePageStore = create((set) => ({
 
             if (docSnap.exists()) {
                 set({ currentUser: docSnap.data(), isLoading: false });
-                console.log("Document data:", docSnap.data());
             } else {
                 set({ currentUser: null, isLoading: false });
             }

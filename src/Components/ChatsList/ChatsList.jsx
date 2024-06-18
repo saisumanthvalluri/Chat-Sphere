@@ -107,7 +107,7 @@ const ChatsList = () => {
         });
 
         const userIndex = allUsers.findIndex((item) => item.uid === id);
-        return `${allUsers[userIndex].name}: `;
+        return `${allUsers[userIndex]?.name}: `;
     };
 
     // const getUnSeenMsgsCount = () => {

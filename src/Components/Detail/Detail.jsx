@@ -1,5 +1,6 @@
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { RiArrowDownSLine } from "react-icons/ri";
 import { useState } from "react";
 import { auth, db } from "../../Config/Firebase-Config";
 import "./Detail.css";
@@ -56,23 +57,18 @@ const Detail = () => {
                     alt="avatar"
                 />
                 <span className="user-name">{user?.name || "user"}</span>
-                <span className="about">
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore repellendus nemo deleniti!
-                    Molestiae autem rem.
-                </span>
+                <span className="about">{user?.about}</span>
             </div>
             <div className="actions">
                 <div className="detail-item">
                     <span>Chat Settings</span>
-                    <img src="arrowDown.png" alt="arrow btn" />
+                    <RiArrowDownSLine className="arrow-btn" />
                 </div>
                 <div className="detail-item">
                     <span onClick={handleOpenPrivacy}>Privacy & help</span>
-                    <img
-                        src="arrowDown.png"
-                        alt="arrow btn"
+                    <RiArrowDownSLine
                         onClick={handleOpenPrivacy}
-                        className={openPrivacy ? "rotate" : null}
+                        className={openPrivacy ? "rotate arrow-btn" : "arrow-btn"}
                     />
                 </div>
                 {openPrivacy && (
@@ -99,17 +95,16 @@ const Detail = () => {
                 )}
                 <div className="detail-item">
                     <span>Shared photos</span>
-                    <img src="arrowDown.png" alt="arrow btn" />
+                    <RiArrowDownSLine className="arrow-btn" />
                 </div>
                 <div className="detail-item">
                     <span>Shared files</span>
-                    <img src="arrowDown.png" alt="arrow btn" />
+                    <RiArrowDownSLine className="arrow-btn" />
                 </div>
                 <div className="block-logout-btn-box">
                     <button className="block-user" disabled={isCurrentUserBlocked} onClick={() => setBlockMdl(true)}>
                         {getTextForBlockBtn()}
                     </button>
-                    {/* <button className="delete-btn">Delete User</button> */}
                     <button className="logout" onClick={() => setOpenMdl(true)}>
                         Logout
                     </button>

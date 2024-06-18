@@ -1,4 +1,12 @@
 import { BsBell } from "react-icons/bs";
+import { RxAvatar } from "react-icons/rx";
+import {
+    MdOutlineModeEditOutline,
+    MdOutlineMail,
+    MdOutlineInfo,
+    MdCancelPresentation,
+    MdOutlineCheckBox,
+} from "react-icons/md";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { UserUserStore } from "../../../lib/UserStore";
 import "./UserInfo.css";
@@ -9,12 +17,21 @@ import DynamicDateFormatter from "../../DynamicDateFormatter/DynamicDateFormatte
 import { toast } from "react-toastify";
 import { useChatStore } from "../../../lib/ChatStore";
 import generateRandomId from "../../Common/DynamicIdGenerator";
+import ParallaxPixelStars from "../../Common/ParallaxPixelStars";
+import FileUpload from "../../../lib/FileUpload";
 
 const UserInfo = () => {
     // const [openNotifications, setOpenNotifications] = useState(false);
+    const { currentUser } = UserUserStore();
     const [notifications, setNotifications] = useState([]);
     const [onlyUnread, setOnlyUnread] = useState(false);
-    const { currentUser } = UserUserStore();
+    const [editStatus, setEditStatus] = useState({ name: false, about: false, email: false });
+    const [loading, setLoading] = useState(false);
+    const [name, setName] = useState(currentUser?.name);
+    const [email, setEmail] = useState(currentUser?.email);
+    const [about, setAbout] = useState(currentUser?.about || "At Work");
+
+    const [profileOpen, setProfileOpen] = useState(false);
     const { isNotificationsOpen, setNotificationsClose, toggleNotifications } = useChatStore();
 
     useEffect(() => {
@@ -113,6 +130,41 @@ const UserInfo = () => {
         }
     };
 
+    const toggleProfileBox = () => {
+        setProfileOpen((prev) => !prev);
+    };
+
+    const getUnreadNotificationsLength = () =>
+        currentUser?.notifications?.filter((item) => item?.isSeen === false)?.length;
+
+    const handleToggleEdit = (val) => {
+        setEditStatus((prev) => ({ ...prev, [val]: !prev[val] }));
+    };
+
+    const onSave = async (val) => {
+        try {
+            const currUserRef = collection(db, "users");
+            await updateDoc(doc(currUserRef, currentUser.uid), {
+                [val]: val === "name" ? name : val === "about" ? about : email,
+            });
+            handleToggleEdit(val);
+            toast.success(`${val} updated!`);
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const profileAvatarHandler = async (e) => {
+        setLoading(true);
+        const file = e.target.files[0];
+        // setProfileAvatar({ file: e.target.files[0], url: URL.createObjectURL(e.target.files[0]) });
+        const newProfileURL = file && (await FileUpload(e.target.files[0], currentUser?.uid));
+        await updateDoc(doc(collection(db, "users"), currentUser.uid), {
+            avatarUrl: newProfileURL,
+        });
+        setLoading(false);
+    };
+
     return (
         <div className="user-info">
             <div className="detail">
@@ -122,14 +174,12 @@ const UserInfo = () => {
             <div className="actions">
                 {/* <img src="/more.png" alt="more" /> */}
                 {/* <img src="/video.png" alt="video" /> */}
-                <img src="edit.png" alt="edit" />
+                <img src="edit.png" alt="edit" onClick={toggleProfileBox} className="icon" />
                 <div className="bell-icon-box" onClick={toggleNotifications}>
                     <BsBell className="icon" />
-                    {currentUser?.notifications?.length > 0 && (
+                    {getUnreadNotificationsLength() > 0 && (
                         <div className="count">
-                            <span>
-                                {currentUser?.notifications?.length > 5 ? "5+" : currentUser?.notifications?.length}
-                            </span>
+                            <span>{getUnreadNotificationsLength() > 5 ? "5+" : getUnreadNotificationsLength()}</span>
                         </div>
                     )}
                 </div>
@@ -168,7 +218,7 @@ const UserInfo = () => {
                                     switch (notification.type) {
                                         case 1:
                                             return (
-                                                <li key={index}>
+                                                <li key={index} className={notification.isSeen ? "readed" : ""}>
                                                     <img
                                                         src={notification?.user?.avatarUrl || "./avatar.png"}
                                                         alt="avatar"
@@ -200,7 +250,7 @@ const UserInfo = () => {
                                             );
                                         case 2:
                                             return (
-                                                <li key={index}>
+                                                <li key={index} className={notification.isSeen ? "readed" : ""}>
                                                     <img
                                                         src={notification?.user?.avatarUrl || "./avatar.png"}
                                                         alt="avatar"
@@ -230,6 +280,157 @@ const UserInfo = () => {
                     </div>
                 )}
                 {/* notifications box ends */}
+
+                {/* Profile box starts */}
+                {profileOpen && (
+                    <div className="profile-edit-box">
+                        <label htmlFor="PROFILE-AVATAR">
+                            {!loading ? (
+                                <div className="profile-img-box">
+                                    <img src={currentUser?.avatarUrl || "/avatar.png"} alt="avatar" />
+                                </div>
+                            ) : (
+                                <div className="skeleton"></div>
+                            )}
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="PROFILE-AVATAR"
+                            style={{ display: "none" }}
+                            onChange={(e) => profileAvatarHandler(e)}
+                        />
+                        <ul className="profile-detail-list">
+                            <li>
+                                <RxAvatar className="prof-icon" />
+                                {!editStatus?.name ? (
+                                    <div className="detail">
+                                        <div className="lable-val-box">
+                                            <span className="lable">Name</span>
+                                            <span className="val">{currentUser?.name}</span>
+                                            <span className="note">
+                                                This is not your username or pin. This name will be visible to your
+                                                friends.
+                                            </span>
+                                        </div>
+                                        <MdOutlineModeEditOutline
+                                            className="prof-edit-icon"
+                                            onClick={() => handleToggleEdit("name")}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="detail-edit-box">
+                                        <label htmlFor="NAME">Name ({name.length}/14)</label>
+                                        <div className="input-actions-box">
+                                            <input
+                                                autoFocus
+                                                maxLength={14}
+                                                value={name}
+                                                id="NAME"
+                                                type="text"
+                                                placeholder="name"
+                                                onChange={(e) => setName(e.target.value)}
+                                            />
+                                            <MdCancelPresentation
+                                                onClick={() => handleToggleEdit("name")}
+                                                className="edit-action-icon cancel"
+                                            />
+                                            <MdOutlineCheckBox
+                                                className="edit-action-icon"
+                                                onClick={() => onSave("name")}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
+                            <li>
+                                <MdOutlineInfo className="prof-icon" />
+                                {!editStatus.about ? (
+                                    <div className="detail">
+                                        <div className="lable-val-box">
+                                            <span className="lable">About</span>
+                                            <span className="val">{currentUser?.about || "At Work"}</span>
+                                        </div>
+                                        <MdOutlineModeEditOutline
+                                            className="prof-edit-icon"
+                                            onClick={() => handleToggleEdit("about")}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="detail-edit-box">
+                                        <label htmlFor="ABOUT">About ({about?.length}/50)</label>
+                                        <div className="input-actions-box">
+                                            {/* <input
+                                                autoFocus
+                                                maxLength={50}
+                                                value={about}
+                                                id="ABOUT"
+                                                type="text"
+                                                placeholder="About"
+                                                onChange={(e) => setAbout(e.target.value)}
+                                            /> */}
+
+                                            <textarea
+                                                autoFocus
+                                                maxLength={100}
+                                                value={about}
+                                                id="ABOUT"
+                                                type="text"
+                                                placeholder="About"
+                                                name="about"
+                                                cols={4}
+                                                onChange={(e) => setAbout(e.target.value)}></textarea>
+                                            <MdCancelPresentation
+                                                onClick={() => handleToggleEdit("about")}
+                                                className="edit-action-icon cancel"
+                                            />
+                                            <MdOutlineCheckBox
+                                                className="edit-action-icon"
+                                                onClick={() => onSave("about")}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
+                            <li>
+                                <MdOutlineMail className="prof-icon" />
+                                {!editStatus?.email ? (
+                                    <div className="detail">
+                                        <div className="lable-val-box">
+                                            <span className="lable">Email</span>
+                                            <span className="val">{currentUser?.email}</span>
+                                        </div>
+                                        {/* <MdOutlineModeEditOutline
+                                            className="prof-edit-icon"
+                                            onClick={() => handleToggleEdit("email")}
+                                        /> */}
+                                    </div>
+                                ) : (
+                                    <div className="detail-edit-box">
+                                        <label htmlFor="EMAIL">Email</label>
+                                        <div className="input-actions-box">
+                                            <input
+                                                autoFocus
+                                                value={email}
+                                                id="EMAIL"
+                                                type="text"
+                                                placeholder="sample@gmail.com"
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            />
+                                            <MdCancelPresentation
+                                                onClick={() => handleToggleEdit("email")}
+                                                className="edit-action-icon cancel"
+                                            />
+                                            <MdOutlineCheckBox className="edit-action-icon" />
+                                        </div>
+                                    </div>
+                                )}
+                            </li>
+                        </ul>
+                        <ParallaxPixelStars />
+                    </div>
+                )}
+                {/* Profile box ends */}
             </div>
         </div>
     );

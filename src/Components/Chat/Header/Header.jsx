@@ -10,7 +10,7 @@ const Header = () => {
                 <img src={(!(isCurrentUserBlocked || isReceiverBlocked) && user?.avatarUrl) || "/avatar.png"} alt="" />
                 <div className="chat-user-info-text">
                     <h3>{user?.name || "User"}</h3>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+                    <p>{user?.about}</p>
                 </div>
             </div>
             <div className="chat-actions">

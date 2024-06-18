@@ -80,6 +80,7 @@ const SignUp = () => {
                             <img src={avatar?.url || "/avatar.png"} alt="avatar" />
                             <input
                                 type="file"
+                                accept="image/*"
                                 id="uploadAvatar"
                                 style={{ display: "none" }}
                                 onChange={(e) => handleChangeAvatar(e)}
