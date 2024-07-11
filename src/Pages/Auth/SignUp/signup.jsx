@@ -16,8 +16,6 @@ const SignUp = () => {
     const [avatar, setAvatar] = useState({ file: null, url: null });
     const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    // const { setCurrentPage, isLoading, setIsLoading } = UsePageStore();
     const { setCurrentUser, isLoading } = UserUserStore();
 
     const handleChangeAvatar = (e) => {
@@ -34,7 +32,7 @@ const SignUp = () => {
             const res = await createUserWithEmailAndPassword(auth, email, password);
             // creating user doc in db with same auth. ID
             // uploading user image in firestore with same auth. ID
-            const imageUrl = (avatar.file && (await FileUpload(avatar?.file, res?.user?.uid))) || null;
+            const imageUrl = (avatar.file && (await FileUpload(avatar?.file, `userAvatars/${res?.user?.uid}`))) || null;
             const newUser = {
                 name,
                 email,

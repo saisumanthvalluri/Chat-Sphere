@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { PiImageLight } from "react-icons/pi";
+import { IoMdMic } from "react-icons/io";
+import { BsEmojiWink } from "react-icons/bs";
+import { TiMessages } from "react-icons/ti";
+import {
+    MdClose,
+    // MdOutlineDownloadForOffline
+} from "react-icons/md";
 import EmojiPicker from "emoji-picker-react";
 import "./Chat.css";
 import Header from "./Header/Header";
@@ -7,16 +15,21 @@ import { db } from "../../Config/Firebase-Config";
 import { useChatStore } from "../../lib/ChatStore";
 import { UserUserStore } from "../../lib/UserStore";
 import DynamicDateFormatter from "../DynamicDateFormatter/DynamicDateFormatter";
+import DynamicIdGenator from "../Common/DynamicIdGenerator";
+import { toast } from "react-toastify";
+import FileUpload from "../../lib/FileUpload";
+import { CircularWithValueLabel } from "../Common/CircularProgress";
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [inputMsg, setInputMsg] = useState("");
     const [pickerOpen, setPickerOpen] = useState(false);
+    const [imgFile, setImgFile] = useState({ file: null, prevUrl: null, loading: false });
+    const [imgStatus, setImgStatus] = useState({ loading: false, progressVal: 0 });
     const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
     const { currentUser } = UserUserStore();
-    // const audio = new Audio("/notify.mp3");
 
-    const ref = useRef(null);
+    const lastMsgRef = useRef(null);
 
     useEffect(() => {
         if (!chatId) return; // Check if chatId exists, if not, return early
@@ -24,6 +37,8 @@ const Chat = () => {
             const data = res.data();
             setMessages(data.messages);
         });
+        handleRemoveFile();
+        setInputMsg("");
 
         return () => {
             unSub();
@@ -32,20 +47,27 @@ const Chat = () => {
 
     // useeffect for getting last msg reference
     useEffect(() => {
-        ref.current?.scrollIntoView({ behavior: "smooth" });
-        // audio.play();
+        lastMsgRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
     const handleSendMsg = async (e) => {
+        const msgId = DynamicIdGenator();
+        let imgLink = null;
         e.preventDefault();
-        if (inputMsg === "") return;
-
+        if (inputMsg === "" && imgFile.file === null) return;
         try {
+            if (imgFile.file) {
+                setImgStatus((prev) => ({ ...prev, loading: true }));
+                imgLink = await FileUpload(imgFile.file, `chatFiles/${chatId}/${msgId}`, setImgStatus);
+                setImgStatus((prev) => ({ ...prev, loading: false }));
+            }
             // adding msg to chats collection
             const chatRef = doc(db, "chats", chatId);
             await updateDoc(chatRef, {
                 messages: arrayUnion({
+                    id: msgId,
                     senderId: currentUser.uid,
+                    img: imgLink,
                     msg: inputMsg,
                     createdAt: Date.now(),
                 }),
@@ -74,9 +96,11 @@ const Chat = () => {
                     });
                 }
             });
+            handleRemoveFile();
             setInputMsg("");
         } catch (error) {
-            console.log(error.message);
+            toast.error(error?.message);
+            console.log(error?.message);
         }
     };
 
@@ -84,6 +108,27 @@ const Chat = () => {
         setInputMsg(inputMsg + emoji.emoji);
         setPickerOpen(false);
     };
+
+    const handleSetFile = (file) => {
+        setImgFile((prev) => ({
+            ...prev,
+            file: file,
+            prevUrl: file ? URL?.createObjectURL(file) : null,
+        }));
+    };
+
+    const handleRemoveFile = () => {
+        setImgFile({ file: null, prevUrl: null, loading: false });
+    };
+
+    // const handleDownload = async (id) => {
+    //     try {
+    //         const fileRef = ref(storage, `chatFiles/${chatId}/${id}`);
+    //         const fileUrl = await getDownloadURL(fileRef);
+    //     } catch (error) {
+    //         console.error("Error downloading the image:", error);
+    //     }
+    // };
 
     return (
         <div
@@ -95,23 +140,45 @@ const Chat = () => {
                 <>
                     <Header />
                     <ul className="chat-messages">
-                        {messages.map((msg) => (
-                            <li className={msg?.senderId === currentUser.uid ? "msg own" : "msg"} key={msg.createdAt}>
-                                <img
-                                    src={
-                                        msg.senderId === currentUser.uid
-                                            ? currentUser.avatarUrl || "/avatar.png"
-                                            : user?.avatarUrl || "/avatar.png"
-                                    }
-                                    alt="avatar"
-                                />
-                                <div className="msg-time-box">
-                                    <p className="msg-text">{msg?.msg}</p>
-                                    <span className="msg-time">{DynamicDateFormatter(msg?.createdAt, true)}</span>
-                                </div>
-                            </li>
-                        ))}
-                        <div ref={ref}></div>
+                        {messages?.length > 0 ? (
+                            messages.map((msg) => (
+                                <li
+                                    className={msg?.senderId === currentUser.uid ? "msg own" : "msg"}
+                                    key={msg.createdAt}>
+                                    <img
+                                        src={
+                                            msg.senderId === currentUser.uid
+                                                ? currentUser.avatarUrl || "/avatar.png"
+                                                : user?.avatarUrl || "/avatar.png"
+                                        }
+                                        alt="avatar"
+                                    />
+                                    <div className="msg-time-box">
+                                        <div className="msg-img-text-box">
+                                            {msg?.img && (
+                                                <div className="img-box">
+                                                    {/* <MdOutlineDownloadForOffline
+                                                        className="download-icon"
+                                                        // onClick={() => window.open(msg?.img)}
+                                                        onClick={() => handleDownload(msg.id)}
+                                                    /> */}
+                                                    <img src={msg?.img} alt="msg-img" />
+                                                </div>
+                                            )}
+                                            {msg?.msg && <p>{msg?.msg}</p>}
+                                        </div>
+                                        <span className="msg-time">{DynamicDateFormatter(msg?.createdAt, true)}</span>
+                                    </div>
+                                </li>
+                            ))
+                        ) : (
+                            <div className="no-msgs-box">
+                                <TiMessages className="no-msg-icon" />
+                                <p className="no-msg-text">You&apos;re starting a new conversation</p>
+                                <span className="no-msg-text">Type your first message below.</span>
+                            </div>
+                        )}
+                        <div ref={lastMsgRef}></div>
                     </ul>
 
                     <div className="footer">
@@ -119,9 +186,17 @@ const Chat = () => {
                             <h2>{`You can not send or receive messages from ${user?.name}`}</h2>
                         ) : (
                             <>
-                                <img src="/img.png" alt="img" />
-                                <img src="camera.png" alt="camara" />
-                                <img src="mic.png" alt="mic" />
+                                <input
+                                    type="file"
+                                    id="SEND_IMAGE"
+                                    style={{ display: "none" }}
+                                    accept="image/*"
+                                    onChange={(e) => handleSetFile(e?.target?.files[0])}
+                                />
+                                <label htmlFor="SEND_IMAGE">
+                                    <PiImageLight className="footer-icons" />
+                                </label>
+                                <IoMdMic className="footer-icons" />
                                 <form onSubmit={(e) => handleSendMsg(e)}>
                                     <input
                                         type="text"
@@ -138,11 +213,20 @@ const Chat = () => {
                                         disabled={isCurrentUserBlocked || isReceiverBlocked}
                                     />
 
-                                    {/* <textarea rows={3}></textarea> */}
+                                    {imgFile.prevUrl && (
+                                        <div className="sent-img-box">
+                                            <MdClose className="close-icon" title="cancel" onClick={handleRemoveFile} />
+                                            <img src={imgFile.prevUrl} alt="img" />
+                                            {imgStatus?.loading && (
+                                                <div className="img-loader-box">
+                                                    {CircularWithValueLabel(imgStatus?.progressVal)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     <div className="emoji-icon-picker-box">
-                                        <img
-                                            src="emoji.png"
-                                            alt="chat"
+                                        <BsEmojiWink
+                                            className="footer-icons"
                                             onClick={() =>
                                                 setPickerOpen((prev) =>
                                                     isCurrentUserBlocked || isReceiverBlocked ? false : !prev
@@ -169,25 +253,9 @@ const Chat = () => {
             ) : (
                 <div className="no-chat-box">
                     <img src="/no-bg-app-logo.png" alt="Logo" />
-
                     <h1>No Chat Selected</h1>
                     <p>Please select a chat to start conversation</p>
                 </div>
-
-                // <div className="container">
-                //     <div className="cube">
-                //         <div className="side front">Front</div>
-                //         <div className="side back">Back</div>
-                //         <div className="side right">Right</div>
-                //         <div className="side left">Left</div>
-                //         <div className="side top">Top</div>
-                //         <div className="side bottom">Bottom</div>
-                //     </div>
-                // </div>
-
-                // <div className="globe">
-                //     <div className="earth"></div>
-                // </div>
             )}
         </div>
     );

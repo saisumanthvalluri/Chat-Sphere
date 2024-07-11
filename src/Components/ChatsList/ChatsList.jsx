@@ -84,16 +84,21 @@ const ChatsList = () => {
         });
 
         const chatIndex = userChats.findIndex((item) => item.chatId === chat.chatId);
+        const isSeen = userChats[chatIndex].isSeen;
 
-        userChats[chatIndex].isSeen = true;
-
-        try {
-            await updateDoc(doc(db, "userChats", currentUser.uid), {
-                chats: userChats,
-            });
+        if (isSeen) {
             changeChat(chat.chatId, chat.user);
-        } catch (error) {
-            console.log(error.message);
+        } else {
+            userChats[chatIndex].isSeen = true;
+
+            try {
+                await updateDoc(doc(db, "userChats", currentUser.uid), {
+                    chats: userChats,
+                });
+                changeChat(chat.chatId, chat.user);
+            } catch (error) {
+                console.log(error.message);
+            }
         }
     };
 
@@ -151,69 +156,6 @@ const ChatsList = () => {
                         {!chat.isSeen && <span>{<PulseRing />}</span>}
                     </li>
                 ))}
-                {/* <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li>
-                <li className={`chat-item`}>
-                    <img src={"/avatar.png"} alt="avatar" />
-                    <div className="chat-detail">
-                        <div className="name-time">
-                            <p className="name">Hello</p>
-                            <p className="time">12:00</p>
-                        </div>
-                    </div>
-                </li> */}
             </ul>
             {getFilteredChats().length === 0 && (
                 <div className="no-chats-box">

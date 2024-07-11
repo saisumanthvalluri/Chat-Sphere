@@ -1,8 +1,8 @@
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../Config/Firebase-Config";
 
-const FileUpload = async (file, uid) => {
-    const storageRef = ref(storage, `userAvatars/${uid}`);
+const FileUpload = async (file, path, setImgStatus) => {
+    const storageRef = ref(storage, path);
 
     const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -11,7 +11,7 @@ const FileUpload = async (file, uid) => {
             "state_changed",
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log("Upload is " + progress + "% done");
+                setImgStatus && setImgStatus((prev) => ({ ...prev, progressVal: progress }));
             },
             (error) => {
                 reject("Something Went Wrong!" + error?.code);

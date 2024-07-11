@@ -158,7 +158,7 @@ const UserInfo = () => {
         setLoading(true);
         const file = e.target.files[0];
         // setProfileAvatar({ file: e.target.files[0], url: URL.createObjectURL(e.target.files[0]) });
-        const newProfileURL = file && (await FileUpload(e.target.files[0], currentUser?.uid));
+        const newProfileURL = file && (await FileUpload(e.target.files[0], `userAvatars/${currentUser?.uid}`));
         await updateDoc(doc(collection(db, "users"), currentUser.uid), {
             avatarUrl: newProfileURL,
         });
@@ -243,9 +243,9 @@ const UserInfo = () => {
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    <div className="read-unread-box">
+                                                    {/* <div className="read-unread-box">
                                                         <input type="checkbox" />
-                                                    </div>
+                                                    </div> */}
                                                 </li>
                                             );
                                         case 2:

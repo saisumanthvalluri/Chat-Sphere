@@ -27,6 +27,21 @@ const ChatSphere = () => {
         };
     }, [getCurrentUserInfo, setCurrentUser]);
 
+    // to prevent right click navigation
+    useEffect(() => {
+        const handleContextMenu = (event) => {
+            event.preventDefault();
+        };
+
+        // Add event listener to the entire document
+        document.addEventListener("contextmenu", handleContextMenu);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            document.removeEventListener("contextmenu", handleContextMenu);
+        };
+    }, []);
+
     return (
         <Router>
             <div className="bg-container">
