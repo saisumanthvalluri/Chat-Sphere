@@ -116,6 +116,11 @@
                 .download-icon {
                     font-size: 18px;
                     color: var(--text-primary-color);
+                    transition: all 0.3s ease-in-out;
+
+                    &:hover {
+                        opacity: 0.7;
+                    }
                 }
             }
 

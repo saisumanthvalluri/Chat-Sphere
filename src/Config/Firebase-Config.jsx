@@ -4,12 +4,12 @@ import { getFirestore } from "@firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBsieMdFZJXKAaG6rlYBOqqqwAqSYRp-qQ",
-    authDomain: "chat-sphere-c5c9c.firebaseapp.com",
-    projectId: "chat-sphere-c5c9c",
-    storageBucket: "chat-sphere-c5c9c.appspot.com",
-    messagingSenderId: "1071863719251",
-    appId: "1:1071863719251:web:aabc56cdd278bab3152da6",
+    apiKey: import.meta.env.VITE_API_KEY,
+    authDomain: import.meta.env.VITE_AUTHDOMAIN,
+    projectId: import.meta.env.VITE_PROJECTID,
+    storageBucket: import.meta.env.VITE_STORAGEBUCKET,
+    messagingSenderId: import.meta.env.VITE_MESSAGINGSENDERID,
+    appId: import.meta.env.VITE_APPID,
 };
 
 // Initialize Firebase

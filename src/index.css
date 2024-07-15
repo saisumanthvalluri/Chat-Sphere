@@ -191,16 +191,28 @@ a {
         .back-icon {
             font-size: 18px;
             cursor: pointer;
+            transition: all 0.3s ease-in-out;
+
+            &:hover {
+                opacity: 0.8;
+            }
         }
 
         p {
             font-size: 12px;
             font-weight: 300;
+            color: var(--text-secondary-color);
         }
 
         .menu-icon {
+            font-size: 18px;
             cursor: pointer;
             margin-left: auto;
+            transition: all 0.3s ease-in-out;
+
+            &:hover {
+                opacity: 0.8;
+            }
         }
     }
 
