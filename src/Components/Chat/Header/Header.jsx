@@ -1,13 +1,8 @@
 import { useChatStore } from "../../../lib/ChatStore";
 import "./Header.css";
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiUrl = import.meta.env.VITE_API_URL;
 
 const Header = () => {
     const { user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
-
-    console.log("API Key:", apiKey);
-    console.log("API URL:", apiUrl);
 
     return (
         <div className="chat-header">
